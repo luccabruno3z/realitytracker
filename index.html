@@ -1,92 +1,403 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRT Tracker</title>
-    
-    <!-- Librerías externas -->
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+    <!-- jQuery and jQuery UI -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <!-- Custom Scripts -->
+    <script src="js/utils/initializable.js"></script>
+    <script src="js/utils/downloadmanager.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/maprenderer.js"></script>
+    <script src="js/atlas.js"></script>
+    <script src="js/bookmark.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/selection.js"></script>
+    <script src="js/scoreboard.js"></script>
+    <script src="js/vehicletables.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/serverinfo.js"></script>
+    <script src="js/draggingandzoom.js"></script>
+    <script src="js/parser.js"></script>
+    <script src="js/protocol.js"></script>
+    <script src="js/killlines.js"></script>
+    <script src="js/helperfunctions.js"></script>
+    <script src="js/eventdialog.js"></script>
+    <script src="js/highlightarea.js"></script>
+    <script src="js/zlib_inflate.js"></script>
+    <script src="js/3d/renderer3d.js"></script>
+    <script src="js/3d/gl-matrix.js"></script>
+    <script src="js/3d/heightmap.js"></script>
+    <script src="js/3d/terrain.js"></script>
+    <script src="js/3d/geometry2d.js"></script>
+    <script src="js/3d/geometry.js"></script>
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css">
 
-    <!-- Scripts de librerías -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" defer></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" defer></script>
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
 
-    <!-- Scripts internos -->
-    <script src="js/utils/initializable.js" defer></script>
-    <script src="js/utils/downloadmanager.js" defer></script>
-    <script src="js/animations.js" defer></script>
-    <script src="js/canvas.js" defer></script>
-    <script src="js/main.js" defer></script>
-    <script src="js/serverinfo.js" defer></script>
-    <script src="js/draggingandzoom.js" defer></script>
-    <script src="js/parser.js" defer></script>
-    <script src="js/highlightarea.js" defer></script>
-    <script src="js/3d/renderer3d.js" defer></script>
-    <script src="js/3d/terrain.js" defer></script>
+        #downloads, #DemoSelectionInterface, #floaters, #mainContainer {
+            background-color: #333333;
+            padding: 20px;
+            border: 1px solid #444444;
+            border-radius: 8px;
+            margin: 10px;
+        }
+
+        #headerInner, #selection, #serverinfoContainer, #scoreBoardContainer, #vehiclesContainer, #bookmarksContainer, #mapOptions, #controlBarContainer {
+            background-color: #262626;
+            border: 1px solid #444444;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        #DemoSelectionInterfaceInner {
+            text-align: center;
+        }
+
+        #demoFileSelectionURL, #bookmarkCommentField {
+            width: 80%;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #555555;
+            background-color: #444444;
+            color: #ffffff;
+        }
+
+        button, .cursorPointer {
+            background-color: #555555;
+            border: 1px solid #666666;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover, .cursorPointer:hover {
+            background-color: #666666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #444444;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #555555;
+        }
+
+        #menuList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #menuList > li {
+            padding: 10px;
+            background-color: #444444;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+
+        #menuList > li > div {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #menuList > li > ul {
+            list-style-type: none;
+            padding: 0;
+            display: none;
+        }
+
+        #menuList > li > ul > li {
+            padding: 5px;
+            background-color: #555555;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+
+        #playBar, #playSpeed, #options_canvasScale {
+            width: 100%;
+        }
+
+        #mapOptionsDiv {
+            padding: 10px;
+            background-color: #333333;
+            border-radius: 5px;
+        }
+
+        #controlBarOptions svg {
+            fill: #ffffff;
+        }
+    </style>
 </head>
 <body>
-    <!-- Indicador de carga -->
-    <div id="loadingStatusOverlay">
-        Loading...
+    <div id="downloads">
+        <table id="downloadsTable"></table>
     </div>
-
-    <!-- Interfaz de selección -->
+    <div id="loadingStatusOverlay">
+        DOM Loading...
+    </div>
     <div id="DemoSelectionInterface" style="display:none">
         <div id="DemoSelectionInterfaceInner">
-            <p>Select file from local or URL (Cross-Origin needs to be enabled on target server):</p>
-            <input type="text" id="demoFileSelectionURL" placeholder="Enter URL">
-            <button type="button" onclick="loadDemo($('#demoFileSelectionURL').val())">Load from URL</button>
-            <p>-OR-</p>
-            <input type="file" id="demoFileSelection">
+            Select file from local or URL <br>(Cross-Origin needs to be enabled on target server)<br />
+            <input type="text" id="demoFileSelectionURL" value="">
+            <button id="demoFileSelectionLoadURL" type="button" onclick="loadDemo($('#demoFileSelectionURL')[0].value)">Load from URL</button>
+            -OR-<br>
+            <input id='demoFileSelection' type='file'/>
+            <div id='demoListSelection' style='display:none'><hr><h4>Official PRT campaign 12 battle replays</h4></div>
         </div>
     </div>
-
-    <!-- Contenedores principales -->
+    <div id="floaters" class="hideAtStart">
+        <div id="headerInner"></div>
+        <div id="selection"></div>
+        <div id="serverinfoContainer">
+            <table id="serverinfoTable"></table>
+        </div>
+        <div id="addbookmarkComment">
+            Comment:<br>
+            <input type="text" id="bookmarkCommentField" value="" class="text">
+        </div>
+        <div id="scoreBoardContainer">
+            <div id="scoreBoard">
+                <div id="Team2Players">
+                    <table id="Commander2" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>Commander</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad21" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>1.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad22" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>2.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad23" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>3.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad24" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>4.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad25" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>5.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad26" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>6.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad27" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>7.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad28" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>8.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad29" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>9.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Unassigned2" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>Unassigned</td></tr>
+                        </thead>
+                    </table>
+                </div>
+                <div id="Team1Players">
+                    <table id="Commander1" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>Commander</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad11" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>1.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad12" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>2.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad13" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>3.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad14" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>4.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad15" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>5.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad16" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>6.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad17" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>7.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad18" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>8.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Squad19" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>9.</td></tr>
+                        </thead>
+                    </table>
+                    <table id="Unassigned1" class="scoreboard-squad-table">
+                        <thead>
+                            <tr><td>Unassigned</td></tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="vehiclesContainer">
+        <div id="vehicles">
+            <div id="Team2Vehicles"></div>
+            <div id="Team1Vehicles"></div>
+        </div>
+    </div>
+    <div id="bookmarksContainer">
+        <table id="bookmarksTable">
+            <colgroup id="bookmarksTableColgroup">
+                <col>
+                <col>
+                <col>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>Time</td>
+                    <td>Comment</td>
+                    <td>Remove</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <div id="mainContainer" class="hideAtStart">
-        <nav>
-            <ul id="menuList">
-                <li>
-                    <button onclick="toggleSubMenu('scoreBoard')">ScoreBoard (Z)</button>
-                </li>
-                <li>
-                    <button onclick="toggleSubMenu('kills')">Kills (X)</button>
-                </li>
-                <li>
-                    <button onclick="toggleSubMenu('chat')">Chat (T)</button>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Opciones del mapa -->
+        <ul id="menuList">
+            <li>
+                <div>Menus</div>
+                <ul>
+                    <li><div onclick="toggleSubMenu('scoreBoard')">ScoreBoard (Z)</div></li>
+                    <li><div onclick="toggleSubMenu('kills')">Kills (X)</div></li>
+                    <li><div onclick="toggleSubMenu('chat')">Chat (T)</div></li>
+                    <li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
+                    <li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
+                    <li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
+                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div></li>
+                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div></li>
+                </ul>
+            </li>
+        </ul>
+        <div id="toggleBookmarks" class="subMenuToggle" onclick="toggleSubMenu('bookmarks')">
+            <img src=".\Graphics\UI\star.png" alt="Toggle Bookmarks">
+        </div>
+        <div id="copyLink" class="subMenuToggle" onclick="copyTrackerLink()">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>Copy link with timestamp</title>
+                <desc>Created with Sketch.</desc>
+                <g fill="#FFFFFF" fill-rule="nonzero">
+                    <path d="M5.50280381,4.62704038 L5.5,6.75 L5.5,17.2542087 C5.5,19.0491342 6.95507456,20.5042087 8.75,20.5042087 L17.3662868,20.5044622 C17.057338,21.3782241 16.2239751,22.0042087 15.2444057,22.0042087 L8.75,22.0042087 C6.12664744,22.0042087 4,19.8775613 4,17.2542087 L4,6.75 C4,5.76928848 4.62744523,4.93512464 5.50280381,4.62704038 Z M17.75,2 C18.9926407,2 20,3.00735931 20,4.25 L20,17.25 C20,18.4926407 18.9926407,19.5 17.75,19.5 L8.75,19.5 C7.50735931,19.5 6.5,18.4926407 6.5,17.25 L6.5,4.25 C6.5,3.00735931 7.50735931,2 8.75,2 L17.75,2 Z M17.75,3.5 L8.75,3.5 C8.33578644,3.5 8,3.83578644 8,4.25 L8,17.25 C8,17.6642136 8.33578644,18 8.75,18 L17.75,18 C18.1642136,18 18.5,17.6642136 18.5,17.25 L18.5,4.25 C18.5,3.83578644 18.1642136,3.5 17.75,3.5 Z"></path>
+                </g>
+            </svg>
+        </div>
         <div id="mapOptions">
             <label id="mapOptionsButton" class="cursorPointer">
                 <input type="checkbox" id="mapOtionsInput">
                 <div id="mapOptionsDiv">
-                    <label><input type="checkbox" checked id="options_DrawDOD" onclick="checkboxClicked(this)"> DoD</label><br>
-                    <label><input type="checkbox" checked id="options_DrawEmptyVehicles" onclick="checkboxClicked(this)"> Empty vehicles</label><br>
-                    <label><input type="checkbox" checked id="options_DrawFlagRadius" onclick="checkboxClicked(this)"> Flag radius</label>
+                    <input type="checkbox" checked="" id="options_DrawDOD" onclick="checkboxClicked(this)">
+                    DoD
+                    <br>
+                    <input type="checkbox" checked="" id="options_DrawEmptyVehicles" onclick="checkboxClicked(this)">
+                    Empty vehicles
+                    <br>
+                    <input type="checkbox" checked="" id="options_DrawFlagRadius" onclick="checkboxClicked(this)">
+                    Flag radius
+                    <br>
+                    <input type="checkbox" checked="" id="options_DrawKillLines" onclick="checkboxClicked(this)">
+                    Kill lines
+                    <br>
+                    <input type="checkbox" checked="" id="options_DrawKitIcons" onclick="checkboxClicked(this)">
+                    Kit icons
+                    <br>
+                    <input type="checkbox" checked="" id="options_ClampVehiclesToMap" onclick="checkboxClicked(this)">
+                    Clamp vehicles in map
+                    <br>
+                    <input type="checkbox" checked="" id="options_DrawVehicleHeight" onclick="checkboxClicked(this)">
+                    Show air vehicle height
+                    <br>
+                    <input type="checkbox" checked="" id="options_health_vehicles" onclick="checkboxClicked(this)">
+                    Vehicle Health
+                    <br>
+                    <input type="checkbox" checked="" id="options_health_players" onclick="checkboxClicked(this)">
+                    Player Health
+                    <br>
+                    <input type="checkbox" id="options_drawAllOrderIcons" onclick="checkboxClicked(this)">
+                    Orders
+                    <br>
+                    <input type="checkbox" id="options_UseFallbackRenderer" onclick="checkboxClicked(this)">
+                    Use Fallback Renderer
+                    <br>
+                    <input id="options_canvasScale" type="range" min="0.4" max="3.0" value="1.0" step="0.02" oninput="UIScaleChange()">
+                    UI Scale
+                    <br>
                 </div>
             </label>
+            <img src=".\Graphics\UI\stacks.png" alt="Map Options">
         </div>
-
-        <!-- Mapas -->
         <div id="mapDiv">
             <div id="renderers">
                 <canvas id="map"></canvas>
                 <canvas id="map3d" style="display: none;"></canvas>
             </div>
-        </div>
-    </div>
-
-    <!-- Controlador de reproducción -->
-    <div id="controlBarContainer">
-        <button id="startPauseButton" class="state-paused" onclick="togglePlay()">
-            <span class="play-icon">▶</span>
-            <span class="pause-icon">⏸</span>
-        </button>
-    </div>
-</body>
-</html>
+            <div id="controlBarContainer">
+                <button id="startPauseButton"
