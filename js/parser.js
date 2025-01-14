@@ -87,6 +87,50 @@ const MESSAGETYPE = {
 	ERRORMESSAGE: 0xfe,
 };
 
+let killData = [];  // Almacena todas las posiciones de kills
+
+let killData = [];  // Almacena todas las posiciones de kills
+
+// Función principal del parser con filtrado por equipo
+function parsePRDemo(fileBuffer, teamFilter = null) {
+    const dataView = new DataView(fileBuffer);
+    let pos = 0;
+
+    while (pos < dataView.byteLength) {
+        const messageType = dataView.getUint8(pos);
+        pos++;
+
+        switch (messageType) {
+            case 0x10: // PLAYER_UPDATE (Kills y Posiciones)
+                const [size, data] = dataView.unPack(pos, [
+                    "B",   // Player ID
+                    "b",   // Team
+                    "h", "h", "h", // Position X, Y, Z
+                    "h"    // Kills
+                ]);
+                pos += size;
+
+                // Aplicar filtro de equipo si se especifica
+                if ((teamFilter === null || data[1] === teamFilter) && data[4] > 0) { 
+                    killData.push({
+                        PlayerID: data[0],
+                        Team: data[1],
+                        Position: { X: data[2], Y: data[3], Z: data[4] },
+                        Kills: data[4]
+                    });
+                }
+                break;
+
+            default:
+                pos += 1;  // Ignorar otros tipos de mensajes
+        }
+    }
+
+    // Exportar kills después de finalizar el análisis
+    exportKillDataToJson(teamFilter);
+}
+
+
 var TIMESTEP = 0.04
 var tickToTime = [0]
 var _timeCounter = 0
@@ -1976,3 +2020,16 @@ $(() =>
 	
 	messageHandlers[MESSAGETYPE.TICK] = message_Tick
 })
+
+
+// Exportación de JSON con especificación del equipo
+function exportKillDataToJson(teamFilter) {
+    const jsonData = JSON.stringify(killData, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = teamFilter !== null ? `kills_data_team_${teamFilter}.json` : "kills_data.json";
+    a.click();
+    console.log("✅ Archivo de kills exportado correctamente.");
+}
