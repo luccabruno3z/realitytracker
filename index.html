@@ -2,33 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Reality - Visualizador de Replays</title>
-
-    <!-- Librerías necesarias -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    
-    <!-- Importar los scripts de análisis -->
+
+    <!-- Importación de scripts -->
     <script src="js/parser.js"></script>
     <script src="js/protocol.js"></script>
 
-    <!-- Fuentes y estilos -->
+    <!-- Estilos generales -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans&display=swap" rel="stylesheet">
-
     <style>
-        /* Estilo general con tema militar oscuro */
         body {
             font-family: 'Open Sans', sans-serif;
             margin: 0;
             padding: 0;
             background: #0a0a0a;
-            color: #ddd;
+            color: white;
             line-height: 1.6;
         }
 
-        /* Encabezado con logo y regreso */
         header {
             background: #111;
             padding: 20px;
@@ -38,14 +31,9 @@
             border-bottom: 3px solid #ff9900;
         }
 
-        header .logo {
-            display: flex;
-            align-items: center;
-        }
-
         header .logo img {
             max-height: 60px;
-            margin-right: 15px;
+            margin-right: 10px;
         }
 
         header .logo span {
@@ -55,25 +43,17 @@
         }
 
         nav a {
+            color: #ff9900;
             text-decoration: none;
             padding: 10px 20px;
             border: 1px solid #ff9900;
             border-radius: 5px;
-            color: #ff9900;
             transition: all 0.3s ease;
         }
 
         nav a:hover {
             background: #ff9900;
             color: #000;
-        }
-
-        /* Contenido principal */
-        h1 {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 3rem;
-            color: #ff9900;
         }
 
         #mainContainer {
@@ -133,7 +113,7 @@
 </head>
 
 <body>
-    <!-- Encabezado con botón de regreso -->
+    <!-- Encabezado -->
     <header>
         <div class="logo">
             <img src="https://luccabruno3z.github.io/logos/Logo_LDH.png" alt="Logo LDH">
@@ -144,44 +124,85 @@
         </nav>
     </header>
 
-    <!-- Título principal -->
-    <h1>Visualizador de Replays con Mapa de Calor</h1>
-
-    <!-- Panel de Control -->
+    <!-- Contenido principal -->
     <div id="mainContainer">
+        <h1>Visualizador de Replays con Mapa de Calor</h1>
+        
+        <!-- Panel de Control -->
         <div id="controlPanel">
             <h3>Subir Archivo .PRdemo</h3>
-            <input type="file" id="demoFileSelection" onchange="handleFileUpload(event)">
+            <input type="file" id="demoFileSelection" accept=".PRdemo" onchange="handleFileUpload(event)">
             <p>Filtrar por equipo:</p>
-            <button onclick="parsePRDemo(fileBuffer, 1)">Filtrar Equipo 1</button>
-            <button onclick="parsePRDemo(fileBuffer, 2)">Filtrar Equipo 2</button>
-            <button onclick="parsePRDemo(fileBuffer, null)">Mostrar Todos</button>
+            <button onclick="filterByTeam(1)">Filtrar Equipo 1</button>
+            <button onclick="filterByTeam(2)">Filtrar Equipo 2</button>
+            <button onclick="filterByTeam(null)">Mostrar Todos</button>
         </div>
 
         <!-- Contenedor del mapa de calor -->
         <div id="heatmapDiv"></div>
     </div>
 
-    <!-- Pie de página -->
+    <!-- Pie de Página -->
     <footer>
-        <p>Legión de Hierro | <a href="mailto:luccabruno96@gmail.com">Contacto</a></p>
-        <p>© 2025 - Todos los derechos reservados.</p>
+        <p>&copy; 2025 Legión de Hierro | <a href="mailto:info@projectreality.com">Contacto</a></p>
     </footer>
 
-    <!-- Script para carga de archivos -->
+    <!-- Script principal -->
     <script>
         let fileBuffer = null;
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
+            
             reader.onload = function (e) {
                 fileBuffer = e.target.result;
                 alert('Archivo cargado correctamente. Selecciona un equipo o genera el mapa completo.');
             };
+
+            reader.onerror = function () {
+                alert('Error al leer el archivo.');
+            };
+
             reader.readAsArrayBuffer(file);
+        }
+
+        function filterByTeam(team) {
+            if (!fileBuffer) {
+                alert("Por favor, sube un archivo .PRdemo primero.");
+                return;
+            }
+
+            try {
+                parsePRDemo(fileBuffer, team);
+            } catch (error) {
+                console.error("Error al procesar el archivo:", error);
+                alert("Hubo un error al procesar el archivo. Revisa la consola para más detalles.");
+            }
+        }
+
+        // Simulación de la función parsePRDemo (debe ajustarse en parser.js)
+        function parsePRDemo(buffer, teamFilter) {
+            console.log("Procesando archivo PRDemo...");
+            console.log("Equipo filtrado:", teamFilter);
+            // Aquí se implementaría la lógica real para analizar el archivo y extraer datos
+            alert(`Archivo procesado con éxito. Mostrando datos del equipo ${teamFilter !== null ? teamFilter : 'Todos'}`);
+            generarMapaDeCalor(); // Llamada al mapa de calor de ejemplo
+        }
+
+        // Ejemplo simple de generación de un mapa de calor con Plotly
+        function generarMapaDeCalor() {
+            const data = [{
+                z: [
+                    [1, 20, 30],
+                    [20, 1, 60],
+                    [30, 60, 1]
+                ],
+                type: 'heatmap'
+            }];
+
+            Plotly.newPlot('heatmapDiv', data);
         }
     </script>
 </body>
 </html>
-
