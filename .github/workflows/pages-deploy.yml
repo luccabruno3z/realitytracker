@@ -1,0 +1,37 @@
+name: Deploy Reality Tracker to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Se ejecutará cada vez que hagas push en la rama principal
+  workflow_dispatch: # Permite ejecutar manualmente el workflow desde GitHub Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: 🚀 Configurar GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: 🔧 Construcción y preparación
+        run: |
+          npm install http-server
+          mkdir public
+          cp -r * public/
+          touch public/.nojekyll
+
+      - name: 📤 Desplegar en GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./public
+
+      - name: 🚀 Publicar en GitHub Pages
+        uses: actions/deploy-pages@v4
