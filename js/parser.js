@@ -91,7 +91,9 @@ let killData = [];  // Almacena todas las posiciones de kills
 
 let killData = [];  // Almacena todas las posiciones de kills
 
-// Función principal del parser con filtrado por equipo
+let killData = [];  // Almacena todas las posiciones de kills
+
+// Función principal del parser con filtro por equipo
 function parsePRDemo(fileBuffer, teamFilter = null) {
     const dataView = new DataView(fileBuffer);
     let pos = 0;
@@ -103,14 +105,11 @@ function parsePRDemo(fileBuffer, teamFilter = null) {
         switch (messageType) {
             case 0x10: // PLAYER_UPDATE (Kills y Posiciones)
                 const [size, data] = dataView.unPack(pos, [
-                    "B",   // Player ID
-                    "b",   // Team
-                    "h", "h", "h", // Position X, Y, Z
-                    "h"    // Kills
+                    "B", "b", "h", "h", "h", "h"  // Player ID, Team, Posición XYZ, Kills
                 ]);
                 pos += size;
 
-                // Aplicar filtro de equipo si se especifica
+                // Filtrar por equipo
                 if ((teamFilter === null || data[1] === teamFilter) && data[4] > 0) { 
                     killData.push({
                         PlayerID: data[0],
@@ -122,12 +121,13 @@ function parsePRDemo(fileBuffer, teamFilter = null) {
                 break;
 
             default:
-                pos += 1;  // Ignorar otros tipos de mensajes
+                pos += 1;
         }
     }
 
-    // Exportar kills después de finalizar el análisis
+    // Exportar los datos y generar el mapa de calor automáticamente
     exportKillDataToJson(teamFilter);
+    generateHeatmap(killData);
 }
 
 
@@ -2022,7 +2022,7 @@ $(() =>
 })
 
 
-// Exportación de JSON con especificación del equipo
+// Exportar JSON de kills
 function exportKillDataToJson(teamFilter) {
     const jsonData = JSON.stringify(killData, null, 2);
     const blob = new Blob([jsonData], { type: "application/json" });
@@ -2032,4 +2032,27 @@ function exportKillDataToJson(teamFilter) {
     a.download = teamFilter !== null ? `kills_data_team_${teamFilter}.json` : "kills_data.json";
     a.click();
     console.log("✅ Archivo de kills exportado correctamente.");
+}
+
+// ✅ **Generación del mapa de calor usando Plotly.js**
+function generateHeatmap(killData) {
+    const xCoords = killData.map(kill => kill.Position.X);
+    const yCoords = killData.map(kill => kill.Position.Y);
+
+    const data = [{
+        x: xCoords,
+        y: yCoords,
+        type: 'histogram2d',
+        colorscale: 'Reds',
+        nbinsx: 50,
+        nbinsy: 50
+    }];
+
+    const layout = {
+        title: "Mapa de Calor - Kills",
+        xaxis: { title: "Posición X" },
+        yaxis: { title: "Posición Y" }
+    };
+
+    Plotly.newPlot('heatmapDiv', data, layout);  // Renderiza el gráfico en un div con id 'heatmapDiv'
 }
