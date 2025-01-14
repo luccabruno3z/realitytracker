@@ -2,103 +2,168 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Project Reality - Visualizador de Replays</title>
+    <title>Legión de Hierro - Visualizador de Replays</title>
+    
+    <!-- Scripts esenciales -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    
-    <!-- Importar los scripts necesarios -->
     <script src="js/parser.js"></script>
     <script src="js/protocol.js"></script>
 
-    <!-- Estilo CSS Moderno -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
+    <!-- Estilo militar oscuro -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
 
     <style>
+        /* Estilo general con temática militar */
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1e1e2f;
-            color: white;
+            background: #0a0a0a;
+            color: #ddd;
+            line-height: 1.6;
         }
 
-        h1 {
+        /* Encabezado principal */
+        header {
+            background: #111;
+            padding: 20px;
+            border-bottom: 3px solid #ff9900;
             text-align: center;
-            margin-top: 20px;
         }
 
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            letter-spacing: 1px;
+            color: #ff9900;
+        }
+
+        /* Contenedor principal */
         #mainContainer {
             display: flex;
-            justify-content: center;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
 
+        /* Panel de control */
         #controlPanel {
-            margin: 20px;
-            padding: 20px;
-            border-radius: 10px;
-            background: #282a36;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            border: 1px solid #ff9900;
+            text-align: center;
         }
 
-        button {
+        #controlPanel h3 {
+            font-size: 1.8rem;
+            color: #ff9900;
+        }
+
+        /* Estilo de botones */
+        button, input[type="file"] {
             padding: 10px 20px;
-            margin: 5px;
+            margin: 10px;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #4caf50;
-            color: white;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        #heatmapDiv {
-            width: 80%;
-            height: 600px;
-            margin: 20px auto;
             border-radius: 10px;
-            border: 1px solid #333;
-            background: #f8f8f8;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            background: #ff9900;
+            color: #000;
+            transition: all 0.3s ease;
+        }
+
+        button:hover, input[type="file"]:hover {
+            background: #ffcc00;
+            transform: scale(1.05);
+        }
+
+        /* Estilo del mapa de calor */
+        #heatmapDiv {
+            width: 90%;
+            height: 600px;
+            margin-top: 40px;
+            border-radius: 15px;
+            border: 2px solid #ff9900;
+            background: #1e1e1e;
+        }
+
+        /* Pie de página */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #111;
+            color: #ddd;
+        }
+
+        footer a {
+            color: #ff9900;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
-    <h1>Project Reality - Visualizador de Replays con Mapa de Calor</h1>
+    <!-- Encabezado -->
+    <header>
+        <h1>Legión de Hierro - Visualizador de Replays</h1>
+    </header>
+
+    <!-- Contenedor principal -->
     <div id="mainContainer">
         
-        <!-- Panel de control con botones -->
+        <!-- Panel de Control -->
         <div id="controlPanel">
-            <h3>Subir Archivo .PRdemo</h3>
+            <h3>Sube tu Archivo .PRdemo</h3>
             <input type="file" id="demoFileSelection" onchange="handleFileUpload(event)">
-            <p>O selecciona un equipo para filtrar:</p>
-            <button onclick="parsePRDemo(fileBuffer, 1)">Filtrar Equipo 1</button>
-            <button onclick="parsePRDemo(fileBuffer, 2)">Filtrar Equipo 2</button>
-            <button onclick="parsePRDemo(fileBuffer, null)">Mostrar Todos</button>
+            <p>Selecciona un equipo o visualiza el mapa completo:</p>
+            <button onclick="parsePRDemo(fileBuffer, 1)">Mostrar Equipo 1</button>
+            <button onclick="parsePRDemo(fileBuffer, 2)">Mostrar Equipo 2</button>
+            <button onclick="parsePRDemo(fileBuffer, null)">Mapa Completo</button>
         </div>
 
-        <!-- Contenedor para mostrar el mapa de calor -->
+        <!-- Área del Mapa de Calor -->
         <div id="heatmapDiv"></div>
     </div>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>Legión de Hierro | <a href="https://luccabruno3z.github.io/">Volver al Inicio</a></p>
+        <p>© 2025 - Todos los derechos reservados.</p>
+    </footer>
 
     <script>
         let fileBuffer = null;
 
+        // Manejar la carga del archivo
         function handleFileUpload(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
             reader.onload = function (e) {
                 fileBuffer = e.target.result;
-                alert('Archivo cargado correctamente. Selecciona un equipo o genera el mapa completo.');
+                alert('Archivo .PRdemo cargado con éxito. Selecciona un equipo o visualiza el mapa completo.');
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // Simulación de la función parsePRDemo (debe ser implementada en parser.js)
+        function parsePRDemo(buffer, teamFilter) {
+            if (!buffer) {
+                alert("Por favor, sube un archivo primero.");
+                return;
+            }
+
+            alert(`Generando mapa de calor para ${teamFilter ? "Equipo " + teamFilter : "Todos los jugadores"}.`);
+            // Lógica para procesar el archivo y generar el heatmap se gestiona en parser.js
         }
     </script>
 </body>
