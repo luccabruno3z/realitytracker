@@ -2,23 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Legión de Hierro - Visualizador de Replays</title>
-    
-    <!-- Scripts esenciales -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Reality - Visualizador de Replays</title>
+
+    <!-- Librerías necesarias -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- Importar los scripts de análisis -->
     <script src="js/parser.js"></script>
     <script src="js/protocol.js"></script>
 
-    <!-- Estilo militar oscuro -->
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- Fuentes y estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans&display=swap" rel="stylesheet">
 
     <style>
-        /* Estilo general con temática militar */
+        /* Estilo general con tema militar oscuro */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Open Sans', sans-serif;
             margin: 0;
             padding: 0;
             background: #0a0a0a;
@@ -26,75 +28,92 @@
             line-height: 1.6;
         }
 
-        /* Encabezado principal */
+        /* Encabezado con logo y regreso */
         header {
             background: #111;
             padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 3px solid #ff9900;
-            text-align: center;
         }
 
-        header h1 {
+        header .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        header .logo img {
+            max-height: 60px;
+            margin-right: 15px;
+        }
+
+        header .logo span {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 3rem;
-            letter-spacing: 1px;
+            font-size: 2rem;
             color: #ff9900;
         }
 
-        /* Contenedor principal */
-        #mainContainer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+        nav a {
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #ff9900;
+            border-radius: 5px;
+            color: #ff9900;
+            transition: all 0.3s ease;
         }
 
-        /* Panel de control */
+        nav a:hover {
+            background: #ff9900;
+            color: #000;
+        }
+
+        /* Contenido principal */
+        h1 {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 3rem;
+            color: #ff9900;
+        }
+
+        #mainContainer {
+            text-align: center;
+            padding: 50px;
+        }
+
         #controlPanel {
             background: #1e1e1e;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-            border: 1px solid #ff9900;
-            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            margin-bottom: 30px;
         }
 
-        #controlPanel h3 {
-            font-size: 1.8rem;
-            color: #ff9900;
-        }
-
-        /* Estilo de botones */
-        button, input[type="file"] {
+        button {
             padding: 10px 20px;
-            margin: 10px;
+            margin: 5px;
             border: none;
-            border-radius: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
             background: #ff9900;
             color: #000;
-            transition: all 0.3s ease;
+            font-weight: bold;
+            transition: transform 0.3s ease;
         }
 
-        button:hover, input[type="file"]:hover {
-            background: #ffcc00;
-            transform: scale(1.05);
+        button:hover {
+            transform: scale(1.1);
+            background: #e68a00;
         }
 
-        /* Estilo del mapa de calor */
         #heatmapDiv {
-            width: 90%;
+            width: 80%;
             height: 600px;
-            margin-top: 40px;
-            border-radius: 15px;
+            margin: 20px auto;
             border: 2px solid #ff9900;
-            background: #1e1e1e;
+            border-radius: 10px;
         }
 
-        /* Pie de página */
         footer {
             text-align: center;
             padding: 20px;
@@ -104,6 +123,7 @@
 
         footer a {
             color: #ff9900;
+            text-decoration: none;
         }
 
         footer a:hover {
@@ -113,58 +133,55 @@
 </head>
 
 <body>
-    <!-- Encabezado -->
+    <!-- Encabezado con botón de regreso -->
     <header>
-        <h1>Legión de Hierro - Visualizador de Replays</h1>
+        <div class="logo">
+            <img src="https://luccabruno3z.github.io/logos/Logo_LDH.png" alt="Logo LDH">
+            <span>Legión de Hierro - Visualizador de Replays</span>
+        </div>
+        <nav>
+            <a href="https://luccabruno3z.github.io/">Volver a Inicio</a>
+        </nav>
     </header>
 
-    <!-- Contenedor principal -->
+    <!-- Título principal -->
+    <h1>Visualizador de Replays con Mapa de Calor</h1>
+
+    <!-- Panel de Control -->
     <div id="mainContainer">
-        
-        <!-- Panel de Control -->
         <div id="controlPanel">
-            <h3>Sube tu Archivo .PRdemo</h3>
+            <h3>Subir Archivo .PRdemo</h3>
             <input type="file" id="demoFileSelection" onchange="handleFileUpload(event)">
-            <p>Selecciona un equipo o visualiza el mapa completo:</p>
-            <button onclick="parsePRDemo(fileBuffer, 1)">Mostrar Equipo 1</button>
-            <button onclick="parsePRDemo(fileBuffer, 2)">Mostrar Equipo 2</button>
-            <button onclick="parsePRDemo(fileBuffer, null)">Mapa Completo</button>
+            <p>Filtrar por equipo:</p>
+            <button onclick="parsePRDemo(fileBuffer, 1)">Filtrar Equipo 1</button>
+            <button onclick="parsePRDemo(fileBuffer, 2)">Filtrar Equipo 2</button>
+            <button onclick="parsePRDemo(fileBuffer, null)">Mostrar Todos</button>
         </div>
 
-        <!-- Área del Mapa de Calor -->
+        <!-- Contenedor del mapa de calor -->
         <div id="heatmapDiv"></div>
     </div>
 
     <!-- Pie de página -->
     <footer>
-        <p>Legión de Hierro | <a href="https://luccabruno3z.github.io/">Volver al Inicio</a></p>
+        <p>Legión de Hierro | <a href="mailto:info@projectreality.com">Contacto</a></p>
         <p>© 2025 - Todos los derechos reservados.</p>
     </footer>
 
+    <!-- Script para carga de archivos -->
     <script>
         let fileBuffer = null;
 
-        // Manejar la carga del archivo
         function handleFileUpload(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
             reader.onload = function (e) {
                 fileBuffer = e.target.result;
-                alert('Archivo .PRdemo cargado con éxito. Selecciona un equipo o visualiza el mapa completo.');
+                alert('Archivo cargado correctamente. Selecciona un equipo o genera el mapa completo.');
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        // Simulación de la función parsePRDemo (debe ser implementada en parser.js)
-        function parsePRDemo(buffer, teamFilter) {
-            if (!buffer) {
-                alert("Por favor, sube un archivo primero.");
-                return;
-            }
-
-            alert(`Generando mapa de calor para ${teamFilter ? "Equipo " + teamFilter : "Todos los jugadores"}.`);
-            // Lógica para procesar el archivo y generar el heatmap se gestiona en parser.js
         }
     </script>
 </body>
 </html>
+
