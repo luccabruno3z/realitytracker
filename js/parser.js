@@ -93,43 +93,61 @@ let killData = [];  // Almacena todas las posiciones de kills
 
 let killData = [];  // Almacena todas las posiciones de kills
 
-// Función principal del parser con filtro por equipo
-function parsePRDemo(fileBuffer, teamFilter = null) {
-    const dataView = new DataView(fileBuffer);
-    let pos = 0;
+function parsePRDemo(buffer, teamFilter = null) {
+    const demoData = new DataView(buffer);
+    let killsData = [];
+    
+    // Ejemplo de valores para escalar coordenadas (ajustar según el mapa)
+    const mapWidth = 1024;
+    const mapHeight = 1024;
 
-    while (pos < dataView.byteLength) {
-        const messageType = dataView.getUint8(pos);
-        pos++;
+    let offset = 0;
 
-        switch (messageType) {
-            case 0x10: // PLAYER_UPDATE (Kills y Posiciones)
-                const [size, data] = dataView.unPack(pos, [
-                    "B", "b", "h", "h", "h", "h"  // Player ID, Team, Posición XYZ, Kills
-                ]);
-                pos += size;
+    // Procesamiento del archivo .PRdemo (simplificado)
+    while (offset < demoData.byteLength) {
+        // Suponiendo que los datos de evento comienzan con un identificador de kill
+        const eventType = demoData.getUint8(offset); 
+        offset += 1;
 
-                // Filtrar por equipo
-                if ((teamFilter === null || data[1] === teamFilter) && data[4] > 0) { 
-                    killData.push({
-                        PlayerID: data[0],
-                        Team: data[1],
-                        Position: { X: data[2], Y: data[3], Z: data[4] },
-                        Kills: data[4]
-                    });
-                }
-                break;
+        // Detectar evento de kill (identificador ficticio: 1)
+        if (eventType === 1) {
+            const playerID = demoData.getUint16(offset, true);
+            offset += 2;
+            const team = demoData.getUint8(offset);
+            offset += 1;
 
-            default:
-                pos += 1;
+            // Coordenadas X, Y, Z (en float32)
+            const posX = demoData.getFloat32(offset, true);
+            const posY = demoData.getFloat32(offset + 4, true);
+            const posZ = demoData.getFloat32(offset + 8, true);
+            offset += 12;
+
+            // Filtrado por equipo si se especifica
+            if (teamFilter === null || team === teamFilter) {
+                killsData.push({
+                    playerID: playerID,
+                    team: team,
+                    x: Math.round((posX + mapWidth / 2)),  // Normalizar al centro del mapa
+                    y: Math.round((posY + mapHeight / 2)),
+                    z: posZ
+                });
+            }
+        } else {
+            offset += 10;  // Saltar otros tipos de eventos no relevantes
         }
     }
 
-    // Exportar los datos y generar el mapa de calor automáticamente
-    exportKillDataToJson(teamFilter);
-    generateHeatmap(killData);
-}
+    // Exportar los datos extraídos a formato JSON
+    console.log("Datos de kills extraídos:", killsData);
 
+    // Convertir los datos a formato adecuado para el heatmap
+    const dataX = killsData.map(k => k.x);
+    const dataY = killsData.map(k => k.y);
+    const intensities = killsData.map(() => 1); // Cada kill cuenta como 1 evento
+
+    // Llamar a la función para generar el heatmap con el mapa base
+    generarMapaCalor(dataX, dataY, intensities);
+}
 
 var TIMESTEP = 0.04
 var tickToTime = [0]
