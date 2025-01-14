@@ -344,8 +344,8 @@
                     <li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
                     <li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
                     <li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
-                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div>
-                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div>
+                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div></li>
+                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div></li>
                 </ul>
             </li>
         </ul>
@@ -389,4 +389,26 @@
                     <input type="checkbox" checked="" id="options_health_vehicles" onclick="checkboxClicked(this)">
                     Vehicle Health
                     <br>
-                    <input type="checkbox" checked=""
+                    <input type="checkbox" checked="" id="options_health_players" onclick="checkboxClicked(this)">
+                    Player Health
+                    <br>
+                    <input type="checkbox" id="options_drawAllOrderIcons" onclick="checkboxClicked(this)">
+                    Orders
+                    <br>
+                    <input type="checkbox" id="options_UseFallbackRenderer" onclick="checkboxClicked(this)">
+                    Use Fallback Renderer
+                    <br>
+                    <input id="options_canvasScale" type="range" min="0.4" max="3.0" value="1.0" step="0.02" oninput="UIScaleChange()">
+                    UI Scale
+                    <br>
+                </div>
+            </label>
+            <img src=".\Graphics\UI\stacks.png" alt="Map Options">
+        </div>
+        <div id="mapDiv">
+            <div id="renderers">
+                <canvas id="map"></canvas>
+                <canvas id="map3d" style="display: none;"></canvas>
+            </div>
+            <div id="controlBarContainer">
+                <button id="startPauseButton" class
