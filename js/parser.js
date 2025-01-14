@@ -155,7 +155,7 @@ function detectMapFromFilename(filename) {
 
 // Función para generar el heatmap con el mapa base
 function generarMapaCalor(dataX, dataY, intensidades, mapName) {
-    const mapImagePath = `./maps/${mapName}.jpg`; // Ruta de la carpeta maps
+    const mapImagePath = `./Maps/${mapName}.jpg`; // Ruta de la carpeta maps
 
     const heatmapData = [{
         x: dataX,
