@@ -93,60 +93,97 @@ let killData = [];  // Almacena todas las posiciones de kills
 
 let killData = [];  // Almacena todas las posiciones de kills
 
-function parsePRDemo(buffer, teamFilter = null) {
+function parsePRDemo(buffer, fileName, teamFilter = null) {
     const demoData = new DataView(buffer);
     let killsData = [];
-    
-    // Ejemplo de valores para escalar coordenadas (ajustar según el mapa)
+
+    // Dimensiones estándar del mapa (ajustar según sea necesario)
     const mapWidth = 1024;
     const mapHeight = 1024;
 
     let offset = 0;
 
-    // Procesamiento del archivo .PRdemo (simplificado)
+    // Detectar el nombre del mapa a partir del nombre del archivo
+    const mapName = detectMapFromFilename(fileName);
+
+    // Procesamiento del archivo .PRdemo
     while (offset < demoData.byteLength) {
-        // Suponiendo que los datos de evento comienzan con un identificador de kill
-        const eventType = demoData.getUint8(offset); 
+        const eventType = demoData.getUint8(offset);
         offset += 1;
 
-        // Detectar evento de kill (identificador ficticio: 1)
-        if (eventType === 1) {
+        if (eventType === 1) {  // Evento de kill (valor representativo)
             const playerID = demoData.getUint16(offset, true);
             offset += 2;
             const team = demoData.getUint8(offset);
             offset += 1;
 
-            // Coordenadas X, Y, Z (en float32)
             const posX = demoData.getFloat32(offset, true);
             const posY = demoData.getFloat32(offset + 4, true);
             const posZ = demoData.getFloat32(offset + 8, true);
             offset += 12;
 
-            // Filtrado por equipo si se especifica
             if (teamFilter === null || team === teamFilter) {
                 killsData.push({
                     playerID: playerID,
                     team: team,
-                    x: Math.round((posX + mapWidth / 2)),  // Normalizar al centro del mapa
+                    x: Math.round((posX + mapWidth / 2)),
                     y: Math.round((posY + mapHeight / 2)),
                     z: posZ
                 });
             }
         } else {
-            offset += 10;  // Saltar otros tipos de eventos no relevantes
+            offset += 10;
         }
     }
 
-    // Exportar los datos extraídos a formato JSON
-    console.log("Datos de kills extraídos:", killsData);
+    console.log("Kills extraídos:", killsData);
 
-    // Convertir los datos a formato adecuado para el heatmap
+    // Generar heatmap con el mapa detectado
     const dataX = killsData.map(k => k.x);
     const dataY = killsData.map(k => k.y);
-    const intensities = killsData.map(() => 1); // Cada kill cuenta como 1 evento
+    const intensities = killsData.map(() => 1);
 
-    // Llamar a la función para generar el heatmap con el mapa base
-    generarMapaCalor(dataX, dataY, intensities);
+    generarMapaCalor(dataX, dataY, intensities, mapName);
+}
+
+// Función para detectar el nombre del mapa a partir del archivo PRdemo
+function detectMapFromFilename(filename) {
+    const parts = filename.split('_');
+    // El nombre del mapa suele estar en la 7ª posición (index 6)
+    return parts.length >= 7 ? parts[6] : "default_map";
+}
+
+// Función para generar el heatmap con el mapa base
+function generarMapaCalor(dataX, dataY, intensidades, mapName) {
+    const mapImagePath = `./maps/${mapName}.jpg`; // Ruta de la carpeta maps
+
+    const heatmapData = [{
+        x: dataX,
+        y: dataY,
+        z: intensidades,
+        type: 'heatmap',
+        colorscale: 'YlOrRd',
+        opacity: 0.7
+    }];
+
+    const layout = {
+        images: [{
+            source: mapImagePath, // Cargar el mapa automáticamente
+            x: 0,
+            y: 0,
+            sizex: 1024,
+            sizey: 1024,
+            xref: "x",
+            yref: "y",
+            opacity: 1,
+            layer: "below"
+        }],
+        xaxis: {range: [0, 1024]},
+        yaxis: {range: [0, 1024]},
+        title: `Mapa de Calor - ${mapName}`
+    };
+
+    Plotly.newPlot('heatmapDiv', heatmapData, layout);
 }
 
 var TIMESTEP = 0.04
@@ -2050,27 +2087,4 @@ function exportKillDataToJson(teamFilter) {
     a.download = teamFilter !== null ? `kills_data_team_${teamFilter}.json` : "kills_data.json";
     a.click();
     console.log("✅ Archivo de kills exportado correctamente.");
-}
-
-// ✅ **Generación del mapa de calor usando Plotly.js**
-function generateHeatmap(killData) {
-    const xCoords = killData.map(kill => kill.Position.X);
-    const yCoords = killData.map(kill => kill.Position.Y);
-
-    const data = [{
-        x: xCoords,
-        y: yCoords,
-        type: 'histogram2d',
-        colorscale: 'Reds',
-        nbinsx: 50,
-        nbinsy: 50
-    }];
-
-    const layout = {
-        title: "Mapa de Calor - Kills",
-        xaxis: { title: "Posición X" },
-        yaxis: { title: "Posición Y" }
-    };
-
-    Plotly.newPlot('heatmapDiv', data, layout);  // Renderiza el gráfico en un div con id 'heatmapDiv'
 }
