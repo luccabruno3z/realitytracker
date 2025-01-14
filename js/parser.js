@@ -87,104 +87,52 @@ const MESSAGETYPE = {
 	ERRORMESSAGE: 0xfe,
 };
 
-let killData = [];  // Almacena todas las posiciones de kills
+let fileBuffer = null;
+let mapName = "";
 
-let killData = [];  // Almacena todas las posiciones de kills
-
-let killData = [];  // Almacena todas las posiciones de kills
-
-function parsePRDemo(buffer, fileName, teamFilter = null) {
-    const demoData = new DataView(buffer);
-    let killsData = [];
-
-    // Dimensiones estándar del mapa (ajustar según sea necesario)
-    const mapWidth = 1024;
-    const mapHeight = 1024;
-
-    let offset = 0;
-
-    // Detectar el nombre del mapa a partir del nombre del archivo
-    const mapName = detectMapFromFilename(fileName);
-
-    // Procesamiento del archivo .PRdemo
-    while (offset < demoData.byteLength) {
-        const eventType = demoData.getUint8(offset);
-        offset += 1;
-
-        if (eventType === 1) {  // Evento de kill (valor representativo)
-            const playerID = demoData.getUint16(offset, true);
-            offset += 2;
-            const team = demoData.getUint8(offset);
-            offset += 1;
-
-            const posX = demoData.getFloat32(offset, true);
-            const posY = demoData.getFloat32(offset + 4, true);
-            const posZ = demoData.getFloat32(offset + 8, true);
-            offset += 12;
-
-            if (teamFilter === null || team === teamFilter) {
-                killsData.push({
-                    playerID: playerID,
-                    team: team,
-                    x: Math.round((posX + mapWidth / 2)),
-                    y: Math.round((posY + mapHeight / 2)),
-                    z: posZ
-                });
-            }
-        } else {
-            offset += 10;
-        }
+// Función para extraer el nombre del mapa desde el archivo PRdemo
+function extractMapName(fileName) {
+    const regex = /tracker_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}_(.+?)_/;
+    const match = fileName.match(regex);
+    if (match) {
+        return match[1].toLowerCase().replace(/_/g, ' '); // Devolver el nombre del mapa formateado
     }
-
-    console.log("Kills extraídos:", killsData);
-
-    // Generar heatmap con el mapa detectado
-    const dataX = killsData.map(k => k.x);
-    const dataY = killsData.map(k => k.y);
-    const intensities = killsData.map(() => 1);
-
-    generarMapaCalor(dataX, dataY, intensities, mapName);
+    return "default";
 }
 
-// Función para detectar el nombre del mapa a partir del archivo PRdemo
-function detectMapFromFilename(filename) {
-    const parts = filename.split('_');
-    // El nombre del mapa suele estar en la 7ª posición (index 6)
-    return parts.length >= 7 ? parts[6] : "default_map";
-}
-
-// Función para generar el heatmap con el mapa base
-function generarMapaCalor(dataX, dataY, intensidades, mapName) {
-    const mapImagePath = `./Maps/${mapName}.jpg`; // Ruta de la carpeta maps
-
-    const heatmapData = [{
-        x: dataX,
-        y: dataY,
-        z: intensidades,
-        type: 'heatmap',
-        colorscale: 'YlOrRd',
-        opacity: 0.7
-    }];
-
-    const layout = {
-        images: [{
-            source: mapImagePath, // Cargar el mapa automáticamente
-            x: 0,
-            y: 0,
-            sizex: 1024,
-            sizey: 1024,
-            xref: "x",
-            yref: "y",
-            opacity: 1,
-            layer: "below"
-        }],
-        xaxis: {range: [0, 1024]},
-        yaxis: {range: [0, 1024]},
-        title: `Mapa de Calor - ${mapName}`
+// Función para manejar la subida del archivo
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        fileBuffer = e.target.result;
+        mapName = extractMapName(file.name);
+        loadMapImage(mapName); // Cargar la imagen del mapa
+        alert('Archivo cargado correctamente.');
     };
-
-    Plotly.newPlot('heatmapDiv', heatmapData, layout);
+    reader.readAsArrayBuffer(file);
 }
+
+// Cargar la imagen del mapa basado en el nombre detectado
+function loadMapImage(mapName) {
+    const mapImageElement = document.getElementById('mapImage');
+    mapImageElement.src = `maps/${mapName}.jpg`;
+    mapImageElement.style.display = 'block';
+}
+
+// Función para alternar entre el modo de repetición 2D y mapa de calor
+function toggle2DReplay() {
+    document.getElementById('heatmapDiv').style.display = 'none';
+    document.getElementById('mapImage').style.display = 'block';
+}
+
+// Función para generar el mapa de calor 
+function parsePRDemo(buffer, teamFilter = null) {
+    // Aquí va tu lógica de generación del mapa de calor
+    document.getElementById('heatmapDiv').style.display = 'block';
+    document.getElementById('mapImage').style.display = 'none';
+}
+
 
 var TIMESTEP = 0.04
 var tickToTime = [0]
