@@ -6,9 +6,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script>if (window.module) module = window.module;</script>
-
-    <!-- Custom Scripts -->
     <script src="js/utils/initializable.js"></script>
     <script src="js/utils/downloadmanager.js"></script>
     <script src="js/animations.js"></script>
@@ -37,6 +34,7 @@
     <script src="js/3d/terrain.js"></script>
     <script src="js/3d/geometry2d.js"></script>
     <script src="js/3d/geometry.js"></script>
+    <script>if (window.module) module = window.module;</script>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
@@ -151,6 +149,19 @@
 
         #controlBarOptions svg {
             fill: #ffffff;
+        }
+
+        #loadingStatusOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ffffff;
+            text-align: center;
+            font-size: 24px;
+            padding-top: 20%;
         }
     </style>
 </head>
@@ -333,8 +344,8 @@
                     <li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
                     <li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
                     <li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
-                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div></li>
-                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div></li>
+                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div>
+                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div>
                 </ul>
             </li>
         </ul>
@@ -378,26 +389,4 @@
                     <input type="checkbox" checked="" id="options_health_vehicles" onclick="checkboxClicked(this)">
                     Vehicle Health
                     <br>
-                    <input type="checkbox" checked="" id="options_health_players" onclick="checkboxClicked(this)">
-                    Player Health
-                    <br>
-                    <input type="checkbox" id="options_drawAllOrderIcons" onclick="checkboxClicked(this)">
-                    Orders
-                    <br>
-                    <input type="checkbox" id="options_UseFallbackRenderer" onclick="checkboxClicked(this)">
-                    Use Fallback Renderer
-                    <br>
-                    <input id="options_canvasScale" type="range" min="0.4" max="3.0" value="1.0" step="0.02" oninput="UIScaleChange()">
-                    UI Scale
-                    <br>
-                </div>
-            </label>
-            <img src=".\Graphics\UI\stacks.png" alt="Map Options">
-        </div>
-        <div id="mapDiv">
-            <div id="renderers">
-                <canvas id="map"></canvas>
-                <canvas id="map3d" style="display: none;"></canvas>
-            </div>
-            <div id="controlBarContainer">
-                <button id="startPauseButton"
+                    <input type="checkbox" checked=""
