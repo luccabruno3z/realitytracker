@@ -1,227 +1,135 @@
 <!DOCTYPE HTML>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Project Reality - Visualizador de Replays</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
 
-    <!-- Importación de scripts -->
+    <!-- Librerías esenciales y scripts del proyecto -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/utils/initializable.js"></script>
+    <script src="js/utils/downloadmanager.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/maprenderer.js"></script>
+    <script src="js/atlas.js"></script>
+    <script src="js/bookmark.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/selection.js"></script>
+    <script src="js/scoreboard.js"></script>
+    <script src="js/vehicletables.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/serverinfo.js"></script>
+    <script src="js/draggingandzoom.js"></script>
     <script src="js/parser.js"></script>
     <script src="js/protocol.js"></script>
+    <script src="js/killlines.js"></script>
+    <script src="js/helperfunctions.js"></script>
+    <script src="js/eventdialog.js"></script>
+    <script src="js/highlightarea.js"></script>
+    <script src="js/zlib_inflate.js"></script>
+    <script src="js/3d/renderer3d.js"></script>
+    <script src="js/3d/gl-matrix.js"></script>
+    <script src="js/3d/heightmap.js"></script>
+    <script src="js/3d/terrain.js"></script>
+    <script src="js/3d/geometry2d.js"></script>
+    <script src="js/3d/geometry.js"></script>
+    <script>if (window.module) module = window.module;</script>
 
-    <!-- Estilos generales -->
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #0a0a0a;
-            color: white;
-            line-height: 1.6;
-        }
-
-        header {
-            background: #111;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #ff9900;
-        }
-
-        header .logo img {
-            max-height: 60px;
-            margin-right: 10px;
-        }
-
-        header .logo span {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            color: #ff9900;
-        }
-
-        nav a {
-            color: #ff9900;
-            text-decoration: none;
-            padding: 10px 20px;
-            border: 1px solid #ff9900;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        nav a:hover {
-            background: #ff9900;
-            color: #000;
-        }
-
-        #mainContainer {
-            text-align: center;
-            padding: 50px;
-        }
-
-        #controlPanel {
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.7);
-            margin-bottom: 30px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #ff9900;
-            color: #000;
-            font-weight: bold;
-            transition: transform 0.3s ease;
-        }
-
-        button:hover {
-            transform: scale(1.1);
-            background: #e68a00;
-        }
-
-        #heatmapDiv {
-            width: 80%;
-            height: 600px;
-            margin: 20px auto;
-            border: 2px solid #ff9900;
-            border-radius: 10px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: #111;
-            color: #ddd;
-        }
-
-        footer a {
-            color: #ff9900;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <!-- Estilos y fuentes -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
-    <!-- Encabezado -->
-    <header>
-        <div class="logo">
-            <img src="https://luccabruno3z.github.io/logos/Logo_LDH.png" alt="Logo LDH">
-            <span>Legión de Hierro - Visualizador de Replays</span>
-        </div>
-        <nav>
-            <a href="https://luccabruno3z.github.io/">Volver a Inicio</a>
-        </nav>
-    </header>
-
-    <!-- Contenido principal -->
-    <div id="mainContainer">
-        <h1>Visualizador de Replays con Mapa de Calor</h1>
-        
-        <!-- Panel de Control -->
-        <div id="controlPanel">
-            <h3>Subir Archivo .PRdemo</h3>
-            <input type="file" id="demoFileSelection" accept=".PRdemo" onchange="handleFileUpload(event)">
-            <p>Filtrar por equipo:</p>
-            <button onclick="filterByTeam(1)">Filtrar Equipo 1</button>
-            <button onclick="filterByTeam(2)">Filtrar Equipo 2</button>
-            <button onclick="filterByTeam(null)">Mostrar Todos</button>
-        </div>
-
-        <!-- Contenedor del mapa de calor -->
-        <div id="heatmapDiv"></div>
+    <!-- Cargador de archivos -->
+    <div id="downloads">
+        <table id="downloadsTable"></table>
     </div>
 
-    <!-- Pie de Página -->
-    <footer>
-        <p>&copy; 2025 Legión de Hierro | <a href="mailto:info@projectreality.com">Contacto</a></p>
-    </footer>
+    <div id="loadingStatusOverlay">
+        DOM Loading...
+    </div>
 
-    <!-- Script principal -->
-    <script>
-        let fileBuffer = null;
+    <div id="DemoSelectionInterface" style="display:none">
+        <div id="DemoSelectionInterfaceInner">
+            Select file from local or URL <br>(Cross-Origin needs to be enabled on target server)<br />
+            <input type="text" id="demoFileSelectionURL" value="">
+            <button id="demoFileSelectionLoadURL" type="button" onclick="loadDemo($('#demoFileSelectionURL')[0].value)">Load from URL</button>
+            -OR-<br>
+            <input id='demoFileSelection' type='file'/>
+        </div>
+    </div>
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function (e) {
-                fileBuffer = e.target.result;
-                alert('Archivo cargado correctamente. Selecciona un equipo o genera el mapa completo.');
-            };
+    <!-- Contenedor principal -->
+    <div id="mainContainer" class="hideAtStart">
+        <!-- Menú principal -->
+        <ul id="menuList">
+            <li>
+                <div>Menus</div>
+                <ul>
+                    <li><div onclick="toggleSubMenu('scoreBoard')">ScoreBoard (Z)</div></li>
+                    <li><div onclick="toggleSubMenu('kills')">Kills (X)</div></li>
+                    <li><div onclick="toggleSubMenu('chat')">Chat (T)</div></li>
+                    <li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
+                    <li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
+                    <li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
+                    <li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div></li>
+                    <li><div onclick="toggleSubMenu('serverinfo')">Server Info</div></li>
+                </ul>
+            </li>
+        </ul>
 
-            reader.onerror = function () {
-                alert('Error al leer el archivo.');
-            };
+        <!-- Botones y controles -->
+        <div id="toggleBookmarks" class="subMenuToggle" onclick="toggleSubMenu('bookmarks')">
+            <img src="./Graphics/UI/star.png">
+        </div>
+        <div id="copyLink" class="subMenuToggle" onclick="copyTrackerLink()">
+            <svg width="30px" height="30px" viewBox="0 0 24 24">
+                <g fill="#FFFFFF">
+                    <path d="M5.5 4.6V17.25c0 1.8 1.45 3.25 3.25 3.25h8.5a3.25 3.25 0 0 0 3.25-3.25V4.25A3.25 3.25 0 0 0 17.75 1h-8.5a3.25 3.25 0 0 0-3.25 3.25v.35z"/>
+                </g>
+            </svg>
+        </div>
+    </div>
 
-            reader.readAsArrayBuffer(file);
-        }
+    <!-- Contenedores de datos -->
+    <div id="scoreBoardContainer">
+        <div id="scoreBoard">
+            <div id="Team2Players">
+                <table id="Commander2" class="scoreboard-squad-table">
+                    <thead><td>Commander</td></thead>
+                </table>
+            </div>
+            <div id="Team1Players">
+                <table id="Commander1" class="scoreboard-squad-table">
+                    <thead><td>Commander</td></thead>
+                </table>
+            </div>
+        </div>
+    </div>
 
-        function filterByTeam(team) {
-            if (!fileBuffer) {
-                alert("Por favor, sube un archivo .PRdemo primero.");
-                return;
-            }
+    <div id="vehiclesContainer">
+        <div id="vehicles">
+            <div id="Team2Vehicles"></div>
+            <div id="Team1Vehicles"></div>
+        </div>
+    </div>
 
-            try {
-                parsePRDemo(fileBuffer, team);
-            } catch (error) {
-                console.error("Error al procesar el archivo:", error);
-                alert("Hubo un error al procesar el archivo. Revisa la consola para más detalles.");
-            }
-        }
-
-        // Simulación de la función parsePRDemo (debe ajustarse en parser.js)
-        function parsePRDemo(buffer, teamFilter) {
-            console.log("Procesando archivo PRDemo...");
-            console.log("Equipo filtrado:", teamFilter);
-            // Aquí se implementaría la lógica real para analizar el archivo y extraer datos
-            alert(`Archivo procesado con éxito. Mostrando datos del equipo ${teamFilter !== null ? teamFilter : 'Todos'}`);
-            generarMapaDeCalor(); // Llamada al mapa de calor de ejemplo
-        }
-
-      <script>
-    // Ejemplo con Plotly superponiendo imagen del mapa original
-    function generarMapaCalor(dataX, dataY, intensidades) {
-        const heatmapData = [{
-            x: dataX,
-            y: dataY,
-            z: intensidades,
-            type: 'heatmap',
-            colorscale: 'YlOrRd',
-            opacity: 0.6
-        }];
-
-        const layout = {
-            images: [{
-                source: "URL_DEL_MAPA_ORIGINAL",
-                x: 0,
-                y: 0,
-                sizex: 1024,  // Dimensiones ajustadas al mapa
-                sizey: 1024,
-                xref: "x",
-                yref: "y",
-                opacity: 1,
-                layer: "below"
-            }],
-            xaxis: {range: [0, 1024]},
-            yaxis: {range: [0, 1024]},
-            title: 'Mapa de Calor con Mapa Base'
-        };
-
-        Plotly.newPlot('heatmapDiv', heatmapData, layout);
-    }
-
-    </script>
+    <div id="bookmarksContainer">
+        <table id="bookmarksTable">
+            <colgroup id="bookmarksTableColgroup">
+                <col><col><col>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>Time</td>
+                    <td>Comment</td>
+                    <td>Remove</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
