@@ -190,19 +190,38 @@
             generarMapaDeCalor(); // Llamada al mapa de calor de ejemplo
         }
 
-        // Ejemplo simple de generación de un mapa de calor con Plotly
-        function generarMapaDeCalor() {
-            const data = [{
-                z: [
-                    [1, 20, 30],
-                    [20, 1, 60],
-                    [30, 60, 1]
-                ],
-                type: 'heatmap'
-            }];
+      <script>
+    // Ejemplo con Plotly superponiendo imagen del mapa original
+    function generarMapaCalor(dataX, dataY, intensidades) {
+        const heatmapData = [{
+            x: dataX,
+            y: dataY,
+            z: intensidades,
+            type: 'heatmap',
+            colorscale: 'YlOrRd',
+            opacity: 0.6
+        }];
 
-            Plotly.newPlot('heatmapDiv', data);
-        }
+        const layout = {
+            images: [{
+                source: "URL_DEL_MAPA_ORIGINAL",
+                x: 0,
+                y: 0,
+                sizex: 1024,  // Dimensiones ajustadas al mapa
+                sizey: 1024,
+                xref: "x",
+                yref: "y",
+                opacity: 1,
+                layer: "below"
+            }],
+            xaxis: {range: [0, 1024]},
+            yaxis: {range: [0, 1024]},
+            title: 'Mapa de Calor con Mapa Base'
+        };
+
+        Plotly.newPlot('heatmapDiv', heatmapData, layout);
+    }
+
     </script>
 </body>
 </html>
