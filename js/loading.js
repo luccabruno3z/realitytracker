@@ -515,6 +515,7 @@ function stage4LoadingFininshed()
     // Asegúrate de que la interfaz se haya mostrado completamente
     setTimeout(function() {
         // Generar y guardar el archivo JSON con los datos de kills
+        console.log("Calling saveKillPositionsToJson...");
         saveKillPositionsToJson();
     }, 1000); // Espera 1 segundo para garantizar que todo esté cargado
 
