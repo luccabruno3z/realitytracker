@@ -511,9 +511,6 @@ function stage4LoadingFininshed()
     setSpeed(1);
         
     onLoad();
-
-    // Generar y guardar el archivo JSON con los datos de kills
-    saveKillPositionsToJson();
     
    if (getUrlParameter("t")) {
     const tick = getTickfromTimeString(getUrlParameter("t"));
