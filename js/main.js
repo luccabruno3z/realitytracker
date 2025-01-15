@@ -68,6 +68,13 @@ function Stop()
 {
 	isPlaying = false;
 	onPause()
+	    // Verificar si la función saveKillPositionsToJson está definida
+    if (typeof saveKillPositionsToJson !== 'undefined') {
+        console.log("Calling saveKillPositionsToJson at the end of the replay...");
+        saveKillPositionsToJson();
+    } else {
+        console.error("saveKillPositionsToJson is not defined");
+    }
 }
 
 
