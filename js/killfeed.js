@@ -167,3 +167,34 @@ function killfeed_onLoad()
 	killfeed_Reenable()
 	killfeed_UpdateScroll()
 }
+
+function extractKillsData() {
+    const killsData = eventArrays.Kills.events.map(kill => ({
+        time: getTimeStringOfTick(kill.Tick),
+        attackerName: kill.AttackerName,
+        attackerID: kill.AttackerID,
+        attackerTeam: kill.AttackerTeam,
+        victimName: kill.VictimName,
+        victimID: kill.VictimID,
+        victimTeam: kill.VictimTeam,
+        distance: kill.Distance,
+        weapon: kill.Weapon,
+        tick: kill.Tick
+    }));
+    return killsData;
+}
+
+function downloadKillsData() {
+    const killsData = extractKillsData();
+    const jsonStr = JSON.stringify(killsData, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "killsData.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
