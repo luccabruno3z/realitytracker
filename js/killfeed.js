@@ -1,6 +1,9 @@
 "use strict";
 
+"use strict";
+
 function extractKillPositions() {
+    console.log("Extracting kill positions...");
     const killsData = eventArrays.kills.events.map(kill => ({
         attackerName: kill.AttackerName,
         attackerID: kill.AttackerID,
@@ -14,11 +17,19 @@ function extractKillPositions() {
         attackerPosition: { x: kill.AttackerX, y: kill.AttackerY },
         victimPosition: { x: kill.VictimX, y: kill.VictimY }
     }));
+    console.log("Kill positions extracted:", killsData);
     return killsData;
 }
 
 function saveKillPositionsToJson() {
+    console.log("Saving kill positions to JSON...");
     const killsData = extractKillPositions();
+
+    if (killsData.length === 0) {
+        console.log("No kill data found.");
+        return;
+    }
+
     const jsonStr = JSON.stringify(killsData, null, 2);
     const blob = new Blob([jsonStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -29,6 +40,7 @@ function saveKillPositionsToJson() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    console.log("Kill positions JSON saved.");
 }
 
 $(() => {
