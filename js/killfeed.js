@@ -168,9 +168,8 @@ function killfeed_onLoad()
 	killfeed_UpdateScroll()
 }
 
-function extractKillsData() {
-    const killsData = eventArrays.Kills.events.map(kill => ({
-        time: getTimeStringOfTick(kill.Tick),
+function extractKillPositions() {
+    const killsData = eventArrays.kills.events.map(kill => ({
         attackerName: kill.AttackerName,
         attackerID: kill.AttackerID,
         attackerTeam: kill.AttackerTeam,
@@ -179,20 +178,22 @@ function extractKillsData() {
         victimTeam: kill.VictimTeam,
         distance: kill.Distance,
         weapon: kill.Weapon,
-        tick: kill.Tick
+        tick: kill.tick,
+        attackerPosition: { x: kill.AttackerX, y: kill.AttackerY },
+        victimPosition: { x: kill.VictimX, y: kill.VictimY }
     }));
     return killsData;
 }
 
-function downloadKillsData() {
-    const killsData = extractKillsData();
+function saveKillPositionsToJson() {
+    const killsData = extractKillPositions();
     const jsonStr = JSON.stringify(killsData, null, 2);
     const blob = new Blob([jsonStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "killsData.json";
+    a.download = "killPositions.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
